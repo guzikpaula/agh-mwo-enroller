@@ -18,9 +18,22 @@ public class ParticipantRestController {
     ParticipantService participantService;
 
     @RequestMapping(value = "", method = RequestMethod.GET)
-    public ResponseEntity<?> getParticipants() {
-        Collection<Participant> participants = participantService.getAll();
-        return new ResponseEntity<Collection<Participant>>(participants, HttpStatus.OK);
+    public ResponseEntity<?> getParticipants(
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false, defaultValue = "ASC") String sortOrder,
+            @RequestParam(required = false) String key) {
+
+        Collection<Participant> participants;
+
+        if (key != null && !key.isEmpty()) {
+            participants = participantService.getAllFilteredByLogin(key);
+        } else if ("login".equalsIgnoreCase(sortBy)) {
+            participants = participantService.getAllSortedByLogin(sortOrder);
+        } else {
+            participants = participantService.getAll();
+        }
+
+        return new ResponseEntity<>(participants, HttpStatus.OK);
     }
 
 

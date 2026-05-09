@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.company.enroller.model.Participant;
@@ -50,6 +51,20 @@ public class ParticipantService {
         connector.getSession().update(participant);
         transaction.commit();
         return participant;
+    }
+
+    public Collection<Participant> getAllSortedByLogin(String sortOrder) {
+        String order = "DESC".equalsIgnoreCase(sortOrder) ? "DESC" : "ASC"; // domyślnie ASC
+        String hql = "FROM Participant ORDER BY login " + order;
+        Query query = connector.getSession().createQuery(hql);
+        return query.list();
+    }
+
+    public Collection<Participant> getAllFilteredByLogin(String key) {
+        String hql = "FROM Participant WHERE login LIKE :key";
+        Query query = connector.getSession().createQuery(hql);
+        query.setParameter("key", "%" + key + "%");
+        return query.list();
     }
 
 }
