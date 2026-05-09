@@ -34,6 +34,15 @@ public class MeetingRestController {
         return new ResponseEntity<Meeting>(meeting, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/{id}/participants", method = RequestMethod.GET)
+    public ResponseEntity<?> getMeetingParticipants(@PathVariable("id") long id) {
+        Meeting meeting = meetingService.findById(id);
+        if (meeting == null) {
+            return new ResponseEntity<>("Meeting not found", HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(meeting.getParticipants(), HttpStatus.OK);
+    }
+
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<?> registerMeeting(@RequestBody Meeting meeting) {
 
@@ -104,21 +113,19 @@ public class MeetingRestController {
         return new ResponseEntity<>(meeting, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{id}/participants", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{id}/participants/{login}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteParticipant(@PathVariable("id") long id,
                                                @PathVariable("login") String login) {
-
         Meeting meeting = meetingService.findById(id);
         if (meeting == null) {
             return new ResponseEntity<>("Meeting not found", HttpStatus.NOT_FOUND);
         }
-
         Participant participant = participantService.findByLogin(login);
         if (participant == null) {
             return new ResponseEntity<>("Participant not found", HttpStatus.NOT_FOUND);
         }
-        participantService.delete(participant);
-
+        meeting.removeParticipant(participant);
+        meetingService.update(meeting);
         return new ResponseEntity<>(meeting, HttpStatus.NO_CONTENT);
     }
 
